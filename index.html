@@ -506,6 +506,7 @@
         <div class="tips">
           <span>• 拖拽图片到左侧画布，或点击「选择图片」。</span>
           <span>• 默认全图裁成 6×4 张，可调整比例或网格列/行数后导出。</span>
+          <span>• 支持直接粘贴剪贴板图片 (Cmd/Ctrl+V)。</span>
           <span>• 选择比例后，可拖动/缩放裁剪框；滚轮可缩放，双击可放大。</span>
           <span>• 导出时会按网格生成高清 PNG 分片，并打包为 ZIP 下载。</span>
         </div>
@@ -630,6 +631,22 @@
       fileInput.value = '';
     };
 
+    const handlePaste = (event) => {
+      const items = event.clipboardData && event.clipboardData.items;
+      if (!items) return;
+      for (const item of items) {
+        if (item.type && item.type.startsWith('image/')) {
+          const file = item.getAsFile();
+          if (file) {
+            loadImage(file);
+            setStatus('已从剪贴板粘贴图片');
+            return;
+          }
+        }
+      }
+      setStatus('剪贴板中未发现图片');
+    };
+
     uploadBtn.addEventListener('click', () => fileInput.click());
     dropZone.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
@@ -651,6 +668,8 @@
     dropZone.addEventListener('drop', (e) => {
       handleFiles(e.dataTransfer.files);
     });
+
+    window.addEventListener('paste', handlePaste);
 
     ratioGroup.addEventListener('click', (e) => {
       const btn = e.target.closest('button[data-ratio]');
