@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Web端简易图片比例裁剪工具</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='1' y1='0' y2='1'%3E%3Cstop stop-color='%230ea5e9'/%3E%3Cstop offset='1' stop-color='%230284c7'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='url(%23g)'/%3E%3Ctext x='50%' y='55%' font-family='Manrope,Segoe UI,Arial,sans-serif' font-size='28' fill='%23fff' text-anchor='middle' font-weight='700'%3EH%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700&display=swap" rel="stylesheet">
@@ -43,6 +44,20 @@
       align-items: baseline;
       gap: 12px;
       padding: 0 4px;
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #0ea5e9, #0284c7);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      box-shadow: 0 10px 20px rgba(14, 165, 233, 0.25);
     }
 
     h1 {
@@ -329,14 +344,68 @@
       flex: 1 1 48%;
     }
 
+    .social-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--accent-strong);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 6px 8px;
+      border-radius: 10px;
+      background: rgba(14, 165, 233, 0.08);
+      border: 1px solid rgba(14, 165, 233, 0.2);
+      transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+    }
+
+    .social-link:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(14, 165, 233, 0.2);
+      background: rgba(14, 165, 233, 0.12);
+    }
+
+    .social-link svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+
     footer {
       max-width: 1200px;
-      margin: 18px auto 0;
+      margin: 24px auto 0;
       color: var(--muted);
       font-size: 12px;
       display: flex;
       justify-content: space-between;
-      padding: 0 4px;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px 14px;
+      padding: 12px 4px 0;
+      border-top: 1px solid var(--stroke);
+    }
+
+    .footer-left {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 12px;
+      align-items: center;
+    }
+
+    .footer-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .footer-bottom {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 11px;
+      padding: 6px 0 4px;
     }
 
     @media (max-width: 1024px) {
@@ -366,8 +435,9 @@
     }
   </style>
 </head>
-<body>
+  <body>
   <header>
+    <div class="brand-icon">HSn</div>
     <h1>Web端简易图片比例裁剪工具</h1>
     <div class="hint">单文件运行 · 拖拽/点击上传 · 自动 ZIP 打包</div>
   </header>
@@ -444,8 +514,19 @@
   </main>
 
   <footer>
-    <div>Cropper.js · JSZip · 纯前端离线可用</div>
-    <div>保持图片分辨率，导出高清裁剪区域</div>
+    <div class="footer-left">
+      <span>Cropper.js · JSZip · 纯前端离线可用</span>
+      <span>保持图片分辨率，导出高清裁剪区域</span>
+    </div>
+    <div class="footer-right">
+      <a class="social-link" href="https://github.com/HSn0918/image-slicer-tool" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M12 .5C5.65.5.5 5.65.5 12c0 5.1 3.29 9.42 7.86 10.95.58.1.79-.25.79-.56 0-.28-.01-1.02-.02-2-3.2.7-3.88-1.54-3.88-1.54-.53-1.34-1.3-1.7-1.3-1.7-1.06-.72.08-.71.08-.71 1.18.08 1.8 1.22 1.8 1.22 1.04 1.78 2.72 1.27 3.38.97.1-.75.41-1.27.75-1.56-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.3 1.2-3.11-.12-.29-.52-1.46.11-3.06 0 0 .97-.31 3.18 1.19a11.07 11.07 0 0 1 5.8 0c2.2-1.5 3.17-1.19 3.17-1.19.64 1.6.24 2.77.12 3.06.75.81 1.2 1.85 1.2 3.1 0 4.43-2.69 5.42-5.25 5.7.42.36.8 1.06.8 2.14 0 1.54-.01 2.79-.01 3.17 0 .31.21.67.8.55A10.99 10.99 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/>
+        </svg>
+        <span>GitHub 源码</span>
+      </a>
+    </div>
+    <div class="footer-bottom">© HSn</div>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
