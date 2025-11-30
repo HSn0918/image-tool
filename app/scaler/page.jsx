@@ -6,7 +6,7 @@ export default function ScalerPage() {
   const dropzoneRef = useRef(null);
   const [size, setSize] = useState(240);
   const [outputs, setOutputs] = useState([]);
-  const [info, setInfo] = useState('准备就绪');
+  const [info, setInfo] = useState('系统就绪');
   const [canClipboardRead, setCanClipboardRead] = useState(false);
 
   const buildFileName = (name, w, h) => {
@@ -39,7 +39,7 @@ export default function ScalerPage() {
         ctx.drawImage(img, 0, 0, newWidth, newHeight);
         const dataUrl = canvas.toDataURL('image/png');
         addResult(file.name, dataUrl, { width: img.width, height: img.height }, { width: newWidth, height: newHeight });
-        setInfo(`已生成 ${outputs.length + 1} 张图片`);
+        setInfo(`已处理 ${outputs.length + 1} 张图片`);
       };
       img.src = ev.target.result;
     };
@@ -49,10 +49,10 @@ export default function ScalerPage() {
   const handleFiles = (fileList) => {
     const files = Array.from(fileList || []).filter((f) => f.type.startsWith('image/'));
     if (!files.length) {
-      setInfo('未检测到图片文件');
+      setInfo('错误：未检测到图片文件');
       return;
     }
-    setInfo(`正在处理 ${files.length} 张图片…`);
+    setInfo(`正在处理 ${files.length} 张图片...`);
     files.forEach(processImage);
   };
 
@@ -77,15 +77,15 @@ export default function ScalerPage() {
     if (!dropzone) return undefined;
     const onDrag = (e) => {
       e.preventDefault();
-      dropzone.classList.add('border-sky-300', 'bg-blue-50');
+      dropzone.classList.add('border-foreground', 'bg-gray-50');
     };
     const onLeave = (e) => {
       e.preventDefault();
-      dropzone.classList.remove('border-sky-300', 'bg-blue-50');
+      dropzone.classList.remove('border-foreground', 'bg-gray-50');
     };
     const onDrop = (e) => {
       e.preventDefault();
-      dropzone.classList.remove('border-sky-300', 'bg-blue-50');
+      dropzone.classList.remove('border-foreground', 'bg-gray-50');
       handleFiles(e.dataTransfer.files);
     };
     dropzone.addEventListener('dragenter', onDrag);
@@ -105,12 +105,12 @@ export default function ScalerPage() {
   }, [handlePaste]);
 
   useEffect(() => {
-    setInfo(outputs.length ? `已生成 ${outputs.length} 张图片` : '准备就绪');
+    setInfo(outputs.length ? `已生成 ${outputs.length} 张图片` : '系统就绪');
   }, [outputs]);
 
   const importFromClipboard = async () => {
     if (!navigator.clipboard?.read) {
-      setInfo('当前浏览器不支持直接读取剪贴板图片');
+      setInfo('错误：剪贴板访问被拒绝');
       return;
     }
     try {
@@ -125,19 +125,19 @@ export default function ScalerPage() {
         }
       }
       if (!images.length) {
-        setInfo('剪贴板中未发现图片');
+        setInfo('剪贴板中无图片');
         return;
       }
       handleFiles(images);
     } catch (err) {
       console.error(err);
-      setInfo('读取剪贴板失败，请检查权限');
+      setInfo('剪贴板读取失败');
     }
   };
 
   const clearResults = () => {
     setOutputs([]);
-    setInfo('已清空，等待新图片');
+    setInfo('已清空');
   };
 
   const concatUint8 = (arrays) => {
@@ -246,127 +246,122 @@ export default function ScalerPage() {
       URL.revokeObjectURL(url);
     } catch (err) {
       console.error(err);
-      alert('打包失败，请重试');
+      alert('打包失败');
     } finally {
-      setInfo(outputs.length ? `可打包 ${outputs.length} 张` : '准备就绪');
+      setInfo(outputs.length ? `可打包 ${outputs.length} 张` : '系统就绪');
     }
   };
 
   return (
-    <div className="space-y-4 bg-white/95 backdrop-blur border border-slate-200 rounded-2xl shadow-xl p-5">
-      <header className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-sky-400 to-sky-600 text-white font-black grid place-items-center shadow">IT</div>
+    <div className="space-y-6">
+      <header className="flex items-center justify-between pb-4 border-b border-gray-200">
         <div>
-          <h1 className="text-xl font-bold tracking-tight">图片等比例缩放到指定最大尺寸</h1>
-          <p className="text-sm text-slate-600">把图片最长边缩放到指定像素（默认 240），保持宽高比，支持批量、拖拽和直接粘贴。</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">等比例缩放器</h1>
+          <p className="text-sm text-gray-500 mt-1">长边缩放 // 批量处理 // ZIP 导出</p>
         </div>
       </header>
 
-      <main className="space-y-4">
-        <section className="bg-gradient-to-br from-slate-50 to-white border border-slate-200 rounded-2xl shadow p-4 space-y-3">
-          <div className="flex flex-wrap items-center gap-3">
-            <label className="flex items-center gap-3 px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold">
-              <span>目标最长边(px)</span>
-              <input
-                id="sizeInput"
-                type="number"
-                min="1"
-                step="1"
-                value={size}
-                onChange={(e) => setSize(Math.max(1, Number(e.target.value) || 1))}
-                className="w-20 border-0 bg-transparent focus:outline-none focus:ring-0 text-base text-slate-900"
-              />
-            </label>
-            <label htmlFor="fileInput" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-sky-500 to-sky-600 text-white font-semibold shadow hover:shadow-lg cursor-pointer">
-              📁 选择图片（可多选）
-            </label>
-            <input id="fileInput" type="file" accept="image/*" multiple className="hidden" onChange={(e) => handleFiles(e.target.files)} />
-            <button
-              type="button"
-              onClick={importFromClipboard}
-              className="px-4 py-2 rounded-lg border border-slate-200 text-slate-800 bg-slate-50 disabled:opacity-50"
-              disabled={!canClipboardRead}
-              title={canClipboardRead ? '从剪贴板直接读取图片' : '当前浏览器不支持直接读取剪贴板图片'}
-            >
-              从剪贴板导入
-            </button>
-            <button
-              id="zipBtn"
-              className="px-4 py-2 rounded-lg bg-slate-900 text-white font-semibold shadow disabled:opacity-50"
-              type="button"
-              disabled={!outputs.length}
-              onClick={downloadZip}
-            >
-              下载 ZIP（全部）
-            </button>
-            <button id="clearBtn" className="px-4 py-2 rounded-lg border border-slate-200 text-slate-800 bg-slate-50" type="button" onClick={clearResults}>
-              清空结果
-            </button>
-            <div className="text-xs text-slate-600">或直接拖拽图片/截图到下面区域，或在页面上粘贴</div>
+      <div className="vercel-card p-6 space-y-6 bg-white">
+        <div className="flex flex-wrap items-end gap-4">
+          <div className="space-y-2">
+             <label className="vercel-label">目标长边 (px)</label>
+             <div className="flex items-center gap-2">
+               <input
+                 id="sizeInput"
+                 type="number"
+                 min={1}
+                 value={size}
+                 onChange={(e) => setSize(Math.max(1, Number(e.target.value) || 1))}
+                 className="vercel-input w-32"
+               />
+             </div>
           </div>
 
-          <div ref={dropzoneRef} className="border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50 text-center p-8 transition" data-dropzone>
-            <strong className="text-slate-800">把图片拖到这里</strong>
-            <div className="text-sm text-slate-600">支持批量，粘贴截图会自动处理</div>
-          </div>
-          <div id="info" className="text-sm text-slate-600">{info}</div>
-        </section>
+          <div className="flex flex-wrap gap-3 items-center">
+             <label htmlFor="fileInput" className="vercel-button vercel-button-secondary cursor-pointer flex items-center gap-2">
+               <span>加载图片</span>
+             </label>
+             <input id="fileInput" type="file" accept="image/*" multiple className="hidden" onChange={(e) => handleFiles(e.target.files)} />
+             
+             <button className="vercel-button vercel-button-secondary" onClick={importFromClipboard} disabled={!canClipboardRead}>
+               粘贴剪贴板
+             </button>
 
-        <section id="results" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" aria-live="polite">
-          {outputs.map((item) => (
-            <article key={item.name} className="bg-white border border-slate-200 rounded-xl shadow p-3 space-y-2">
-              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-bold">{item.name}</div>
-              <div className="border border-slate-200 rounded-lg bg-white grid place-items-center min-h-[140px]">
-                <img src={item.dataUrl} alt="缩放后的图片预览" className="w-full h-full max-h-[320px] object-contain" />
-              </div>
-              <div className="flex justify-between flex-wrap gap-2 text-xs text-slate-600">
-                <span>原始：{item.original.width} × {item.original.height}</span>
-                <span>输出：{item.resized.width} × {item.resized.height}</span>
-              </div>
-              <div className="flex gap-2 flex-wrap">
-                <a
-                  className="px-3 py-2 rounded-lg bg-gradient-to-r from-sky-500 to-sky-600 text-white text-sm font-semibold shadow hover:shadow-lg"
-                  href={item.dataUrl}
-                  download={item.name}
-                >
-                  下载 PNG
-                </a>
-                <button
-                  type="button"
-                  className="px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm font-semibold"
-                  onClick={async (e) => {
-                    const btn = e.currentTarget;
-                    btn.disabled = true;
-                    btn.textContent = '复制中…';
-                    try {
-                      if (navigator.clipboard && typeof ClipboardItem !== 'undefined') {
-                        const blob = await (await fetch(item.dataUrl)).blob();
-                        await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
-                        btn.textContent = '已复制';
-                      } else if (navigator.clipboard?.writeText) {
-                        await navigator.clipboard.writeText(item.dataUrl);
-                        btn.textContent = '已复制';
-                      } else {
-                        throw new Error('浏览器不支持 Clipboard API');
-                      }
-                    } catch (err) {
-                      console.error(err);
-                      btn.textContent = '复制失败';
-                    } finally {
-                      setTimeout(() => {
-                        btn.textContent = '复制图片';
-                        btn.disabled = false;
-                      }, 1200);
+             <div className="w-px h-8 bg-gray-200 mx-2"></div>
+
+             <button 
+               className="vercel-button vercel-button-primary" 
+               disabled={!outputs.length} 
+               onClick={downloadZip}
+             >
+               下载 ZIP
+             </button>
+             <button className="vercel-button vercel-button-secondary text-red-600 hover:border-red-200 hover:bg-red-50" onClick={clearResults}>
+               清空
+             </button>
+          </div>
+        </div>
+        
+        <div ref={dropzoneRef} className="border-2 border-dashed border-gray-200 rounded-lg bg-gray-50 text-center p-10 transition-all duration-200 hover:border-gray-300" data-dropzone>
+          <strong className="text-foreground text-base block mb-2">拖拽图片到此处</strong>
+          <div className="text-xs text-gray-500 uppercase tracking-widest">支持批量处理</div>
+        </div>
+        <div id="info" className="text-xs text-gray-400 font-mono text-center pt-2">{info}</div>
+      </div>
+
+      <section id="results" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-live="polite">
+        {outputs.map((item) => (
+          <div key={item.name} className="vercel-card p-3 group hover:shadow-md">
+            <div className="flex justify-between items-start mb-3">
+               <span className="text-[10px] px-2 py-1 rounded bg-gray-100 text-gray-600 font-medium truncate max-w-[150px] border border-gray-200">
+                 {item.name}
+               </span>
+            </div>
+            
+            <div className="border border-gray-100 rounded bg-gray-50 grid place-items-center h-40 overflow-hidden mb-3 relative">
+              <img src={item.dataUrl} alt="preview" className="max-w-full max-h-full object-contain p-2" />
+            </div>
+
+            <div className="flex justify-between text-[10px] text-gray-500 font-mono mb-3 border-b border-gray-100 pb-2">
+              <span>原: {item.original.width}x{item.original.height}</span>
+              <span className="text-foreground font-semibold">新: {item.resized.width}x{item.resized.height}</span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              <a href={item.dataUrl} download={item.name} className="vercel-button vercel-button-secondary text-[10px] py-1 px-1 h-8">
+                下载
+              </a>
+              <button
+                className="vercel-button vercel-button-secondary text-[10px] py-1 px-1 h-8"
+                onClick={async (e) => {
+                  const btn = e.currentTarget;
+                  btn.disabled = true;
+                  const originalText = btn.innerText;
+                  btn.innerText = '已复制';
+                  try {
+                    if (navigator.clipboard && typeof ClipboardItem !== 'undefined') {
+                      const blob = await (await fetch(item.dataUrl)).blob();
+                      await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+                    } else if (navigator.clipboard?.writeText) {
+                      await navigator.clipboard.writeText(item.dataUrl);
                     }
-                  }}
-                >
-                  复制图片
-                </button>
-              </div>
-            </article>
-          ))}
-        </section>
-      </main>
+                  } catch (err) {
+                    console.error(err);
+                    btn.innerText = '错误';
+                  } finally {
+                    setTimeout(() => {
+                      btn.innerText = '复制';
+                      btn.disabled = false;
+                    }, 1200);
+                  }
+                }}
+              >
+                复制
+              </button>
+            </div>
+          </div>
+        ))}
+      </section>
     </div>
   );
 }
