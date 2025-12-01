@@ -6,6 +6,7 @@ import Sidebar from "./components/Sidebar";
 import Providers from "./providers";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { type ReactNode } from "react";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -18,7 +19,7 @@ export const metadata = {
   description: "图片裁剪分片与等比例缩放，纯前端本地处理"
 };
 
-export default function RootLayout({ children }) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="zh-CN">
       <body className={cn("min-h-screen bg-muted/30 font-sans antialiased", inter.variable)}>
