@@ -1,7 +1,7 @@
 # image-tool
 
 ## 项目介绍
-因为沉迷使用 gemini 生成表情包，一下子找不到有什么网站可以一键切割表情包，于是就有了这个项目。可以到 [在线地址](image.huangsn.dev) 使用（用的 cloudflare 的 pages 部署，可能需要魔法）
+因为沉迷使用 gemini 生成表情包，一下子找不到有什么网站可以一键切割表情包，于是就有了这个项目。可以到 [在线地址](https://image.huangsn.dev/) 使用（用的 cloudflare 的 pages 部署，可能需要魔法）
 
 ## 功能点
 - 单文件纯前端，图片处理全在本地完成。
