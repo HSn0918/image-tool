@@ -1,5 +1,7 @@
 "use client"
 
+/* eslint-disable @next/next/no-img-element */
+
 import { useCallback, useEffect, useRef, useState } from "react"
 import Cropper from "cropperjs"
 import JSZip from "jszip"
@@ -213,7 +215,7 @@ export default function SlicerPage() {
       // @ts-ignore
       window.removeEventListener("paste", handlePaste)
     }
-  }, [handlePaste])
+  }, [handlePaste]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(
     () => () => {
@@ -334,221 +336,454 @@ export default function SlicerPage() {
     setStatus("视图重置")
   }
 
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 border-b border-border/80 pb-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight text-foreground">
-            图片裁剪分片
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            支持拖拽上传，自定义网格分割并导出 ZIP。
-          </p>
-        </div>
-        <Badge variant="secondary" className="w-fit">
-          本地处理
-        </Badge>
-      </div>
+    return (
 
-      <div className="grid gap-6 lg:grid-cols-[1fr,320px]">
-        <Card
-          ref={dropZoneRef}
-          className="min-h-[600px] cursor-pointer overflow-hidden border-dashed"
-          onClick={() => !hasImage && fileInputRef.current?.click()}
-        >
-          <div className="relative flex h-full w-full items-center justify-center bg-muted/40">
-            <input
-              type="file"
-              ref={fileInputRef}
-              accept="image/*"
-              hidden
-              onChange={(e) => {
-                if (e.target.files) handleFiles(e.target.files)
-              }}
-            />
-            {!hasImage && (
-              <div className="space-y-4 text-center">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
-                  <svg
-                    className="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M12 4v16m8-8H4"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-base font-medium text-foreground">
-                    拖拽图片到此处
-                  </h3>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    或点击区域选择
-                  </p>
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={(event) => {
-                    event.stopPropagation()
-                    fileInputRef.current?.click()
-                  }}
-                >
-                  选择文件
-                </Button>
-              </div>
-            )}
-            <img
-              ref={imageRef}
-              alt="Preview"
-              className={`max-w-full max-h-full select-none object-contain ${
-                hasImage ? "block" : "hidden"
-              }`}
-            />
-            <div ref={overlayRef} className="absolute pointer-events-none" />
+      <div className="flex h-full flex-col gap-6">
+
+        <div className="flex flex-none items-center justify-between border-b pb-4">
+
+          <div>
+
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+
+              图片裁剪分片
+
+            </h1>
+
+            <p className="text-sm text-muted-foreground">
+
+              支持拖拽上传，自定义网格分割并导出 ZIP。
+
+            </p>
+
           </div>
-        </Card>
 
-        <div className="space-y-4">
-          <Card>
-            <CardHeader className="pb-4">
-              <CardTitle className="text-base">纵横比</CardTitle>
-              <CardDescription>可快速限定裁剪框比例</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="grid grid-cols-2 gap-2">
-                {ratioPresets.map((item) => (
-                  <Button
-                    key={item.label}
-                    type="button"
-                    size="sm"
-                    variant={
-                      ratio === String(item.value) ? "default" : "outline"
-                    }
-                    className="w-full"
-                    onClick={() => onRatioClick(String(item.value))}
-                  >
-                    {item.label}
-                  </Button>
-                ))}
-              </div>
-              <Button
-                type="button"
-                size="sm"
-                variant={ratio === "free" ? "default" : "outline"}
-                className="w-full"
-                onClick={() => onRatioClick("free")}
-              >
-                自由（默认）
-              </Button>
-            </CardContent>
-          </Card>
+          <Badge variant="secondary" className="w-fit">
 
-          <Card>
-            <CardHeader className="pb-4">
-              <CardTitle className="text-base">网格配置</CardTitle>
-              <CardDescription>定义导出分片数量</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label htmlFor="cols">列数 (Cols)</Label>
-                  <Input
-                    id="cols"
-                    type="number"
-                    min={1}
-                    value={cols}
-                    onChange={(e) =>
-                      setCols(Math.max(1, Number(e.target.value) || 1))
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="rows">行数 (Rows)</Label>
-                  <Input
-                    id="rows"
-                    type="number"
-                    min={1}
-                    value={rows}
-                    onChange={(e) =>
-                      setRows(Math.max(1, Number(e.target.value) || 1))
-                    }
-                  />
-                </div>
-              </div>
-              <p className="text-right text-xs text-muted-foreground">
-                预览：{cols} x {rows} 分割
-              </p>
-            </CardContent>
-          </Card>
+            本地处理
 
-          <Card>
-            <CardHeader className="pb-4">
-              <CardTitle className="text-base">操作</CardTitle>
-              <CardDescription>快捷控制与导出</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  onClick={onFit}
-                >
-                  重新适配
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  onClick={onFlip}
-                >
-                  水平翻转
-                </Button>
-              </div>
-              <Button type="button" className="w-full" onClick={onDownload}>
-                导出 ZIP
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={onReset}
-              >
-                重置
-              </Button>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span
-                  className={cn(
-                    "h-2 w-2 rounded-full",
-                    status.includes("错误") ? "bg-destructive" : "bg-emerald-500"
-                  )}
-                />
-                <span>{status}</span>
-              </div>
-            </CardContent>
-          </Card>
+          </Badge>
 
-          <Card>
-            <CardHeader className="pb-4">
-              <CardTitle className="text-base">裁剪预览</CardTitle>
-              <CardDescription>实时缩略图</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div
-                ref={previewRef}
-                className="h-32 w-full overflow-hidden rounded-md border bg-muted/40"
-              />
-            </CardContent>
-          </Card>
         </div>
+
+  
+
+        <div className="grid min-h-0 flex-1 gap-6 lg:grid-cols-[1fr_320px]">
+
+          {/* Left: Image Workspace */}
+
+          <div
+
+            ref={dropZoneRef}
+
+            className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-xl border-2 border-dashed bg-muted/20 transition-colors hover:bg-muted/30"
+
+            onClick={() => !hasImage && fileInputRef.current?.click()}
+
+          >
+
+            <input
+
+              type="file"
+
+              ref={fileInputRef}
+
+              accept="image/*"
+
+              hidden
+
+              onChange={(e) => {
+
+                if (e.target.files) handleFiles(e.target.files)
+
+              }}
+
+            />
+
+            {!hasImage && (
+
+              <div className="space-y-4 text-center">
+
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+
+                  <svg
+
+                    className="h-6 w-6"
+
+                    fill="none"
+
+                    viewBox="0 0 24 24"
+
+                    stroke="currentColor"
+
+                  >
+
+                    <path
+
+                      strokeLinecap="round"
+
+                      strokeLinejoin="round"
+
+                      strokeWidth={1.5}
+
+                      d="M12 4v16m8-8H4"
+
+                    />
+
+                  </svg>
+
+                </div>
+
+                <div>
+
+                  <h3 className="text-base font-medium text-foreground">
+
+                    拖拽图片到此处
+
+                  </h3>
+
+                  <p className="mt-1 text-sm text-muted-foreground">
+
+                    或点击区域选择
+
+                  </p>
+
+                </div>
+
+                <Button
+
+                  type="button"
+
+                  variant="outline"
+
+                  size="sm"
+
+                  onClick={(event) => {
+
+                    event.stopPropagation()
+
+                    fileInputRef.current?.click()
+
+                  }}
+
+                >
+
+                  选择文件
+
+                </Button>
+
+              </div>
+
+            )}
+
+                                          <div className={`relative flex h-full w-full items-center justify-center overflow-hidden p-4 ${hasImage ? "" : "hidden"}`}>
+
+                                             {/* eslint-disable-next-line @next/next/no-img-element */}
+
+                                             <img
+
+                                              ref={imageRef}
+
+                                
+
+                      
+
+                          alt="Preview"
+
+                          className={`max-h-full max-w-full object-contain ${
+
+                            hasImage ? "block" : "hidden"
+
+                          }`}
+
+                        />
+
+                        <div ref={overlayRef} className="absolute pointer-events-none" />
+
+                      </div>
+
+            
+
+          </div>
+
+  
+
+          {/* Right: Tools Panel */}
+
+          <div className="flex h-full flex-col gap-4 overflow-y-auto pr-1">
+
+            <Card>
+
+              <CardHeader className="pb-3 pt-4">
+
+                <CardTitle className="text-sm font-medium">纵横比</CardTitle>
+
+              </CardHeader>
+
+              <CardContent className="space-y-2 pb-4">
+
+                <div className="grid grid-cols-3 gap-2">
+
+                  {ratioPresets.map((item) => (
+
+                    <Button
+
+                      key={item.label}
+
+                      type="button"
+
+                      size="sm"
+
+                      variant={
+
+                        ratio === String(item.value) ? "default" : "outline"
+
+                      }
+
+                      className="h-8 text-xs"
+
+                      onClick={() => onRatioClick(String(item.value))}
+
+                    >
+
+                      {item.label}
+
+                    </Button>
+
+                  ))}
+
+                </div>
+
+                <Button
+
+                  type="button"
+
+                  size="sm"
+
+                  variant={ratio === "free" ? "default" : "outline"}
+
+                  className="h-8 w-full text-xs"
+
+                  onClick={() => onRatioClick("free")}
+
+                >
+
+                  自由比例（默认）
+
+                </Button>
+
+              </CardContent>
+
+            </Card>
+
+  
+
+            <Card>
+
+              <CardHeader className="pb-3 pt-4">
+
+                <CardTitle className="text-sm font-medium">网格配置</CardTitle>
+
+              </CardHeader>
+
+              <CardContent className="space-y-3 pb-4">
+
+                <div className="grid grid-cols-2 gap-3">
+
+                  <div className="space-y-1.5">
+
+                    <Label htmlFor="cols" className="text-xs text-muted-foreground">列数 (Cols)</Label>
+
+                    <Input
+
+                      id="cols"
+
+                      type="number"
+
+                      min={1}
+
+                      className="h-8"
+
+                      value={cols}
+
+                      onChange={(e) =>
+
+                        setCols(Math.max(1, Number(e.target.value) || 1))
+
+                      }
+
+                    />
+
+                  </div>
+
+                  <div className="space-y-1.5">
+
+                    <Label htmlFor="rows" className="text-xs text-muted-foreground">行数 (Rows)</Label>
+
+                    <Input
+
+                      id="rows"
+
+                      type="number"
+
+                      min={1}
+
+                      className="h-8"
+
+                      value={rows}
+
+                      onChange={(e) =>
+
+                        setRows(Math.max(1, Number(e.target.value) || 1))
+
+                      }
+
+                    />
+
+                  </div>
+
+                </div>
+
+                <p className="text-right text-[10px] text-muted-foreground">
+
+                  预览：{cols} x {rows} 分割
+
+                </p>
+
+              </CardContent>
+
+            </Card>
+
+  
+
+            <Card>
+
+              <CardHeader className="pb-3 pt-4">
+
+                <CardTitle className="text-sm font-medium">操作</CardTitle>
+
+              </CardHeader>
+
+              <CardContent className="space-y-3 pb-4">
+
+                <div className="grid grid-cols-2 gap-2">
+
+                  <Button
+
+                    type="button"
+
+                    variant="secondary"
+
+                    size="sm"
+
+                    className="h-8 text-xs"
+
+                    onClick={onFit}
+
+                  >
+
+                    重新适配
+
+                  </Button>
+
+                  <Button
+
+                    type="button"
+
+                    variant="secondary"
+
+                    size="sm"
+
+                    className="h-8 text-xs"
+
+                    onClick={onFlip}
+
+                  >
+
+                    水平翻转
+
+                  </Button>
+
+                </div>
+
+                <Button type="button" className="w-full" onClick={onDownload}>
+
+                  导出 ZIP
+
+                </Button>
+
+                <Button
+
+                  type="button"
+
+                  variant="ghost"
+
+                  size="sm"
+
+                  className="h-8 w-full text-xs text-muted-foreground hover:text-foreground"
+
+                  onClick={onReset}
+
+                >
+
+                  重置画布
+
+                </Button>
+
+                <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+
+                  <span
+
+                    className={cn(
+
+                      "h-1.5 w-1.5 rounded-full",
+
+                      status.includes("错误") ? "bg-destructive" : "bg-emerald-500"
+
+                    )}
+
+                  />
+
+                  <span>{status}</span>
+
+                </div>
+
+              </CardContent>
+
+            </Card>
+
+  
+
+            <Card className="flex-1 min-h-[120px]">
+
+              <CardHeader className="pb-3 pt-4">
+
+                <CardTitle className="text-sm font-medium">裁剪预览</CardTitle>
+
+              </CardHeader>
+
+              <CardContent className="pb-4">
+
+                <div
+
+                  ref={previewRef}
+
+                  className="h-full w-full min-h-[100px] overflow-hidden rounded-md border bg-muted/40"
+
+                />
+
+              </CardContent>
+
+            </Card>
+
+          </div>
+
+        </div>
+
       </div>
-    </div>
-  )
-}
+
+    )
+
+  }
+
+  

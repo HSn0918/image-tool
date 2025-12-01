@@ -154,7 +154,7 @@ export default function ScalerPage() {
       // @ts-ignore
       window.removeEventListener("paste", handlePaste)
     }
-  }, [handlePaste])
+  }, [handlePaste]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     setInfo(outputs.length ? `已生成 ${outputs.length} 张图片` : "系统就绪")
@@ -401,13 +401,13 @@ export default function ScalerPage() {
 
           <div
             ref={dropzoneRef}
-            className="rounded-xl border-2 border-dashed border-border bg-muted/40 p-10 text-center transition-all duration-200 hover:border-muted-foreground"
+            className="flex min-h-[400px] flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-muted/40 p-10 text-center transition-all duration-200 hover:border-muted-foreground"
             data-dropzone
           >
-            <strong className="block text-base font-medium text-foreground">
+            <strong className="block text-lg font-medium text-foreground">
               拖拽图片到此处
             </strong>
-            <div className="text-xs text-muted-foreground uppercase tracking-widest">
+            <div className="text-sm text-muted-foreground uppercase tracking-widest">
               支持批量处理
             </div>
           </div>
@@ -422,47 +422,41 @@ export default function ScalerPage() {
 
       <section
         id="results"
-        className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+        className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
         aria-live="polite"
       >
         {outputs.map((item) => (
-          <Card key={item.name} className="group">
-            <CardHeader className="space-y-2">
-              <CardTitle className="text-sm font-semibold leading-tight">
-                {item.name}
-              </CardTitle>
-              <CardDescription className="font-mono text-xs text-muted-foreground">
-                {item.original.width}x{item.original.height} →{" "}
-                {item.resized.width}x{item.resized.height}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex h-40 items-center justify-center rounded-md border bg-muted/50">
-                <img
-                  src={item.dataUrl}
-                  alt="preview"
-                  className="max-h-full max-w-full object-contain p-2"
-                />
-              </div>
-              <div className="flex items-center justify-between text-[11px] font-mono text-muted-foreground">
-                <span>
-                  原: {item.original.width}x{item.original.height}
-                </span>
-                <span className="font-semibold text-primary">
-                  新: {item.resized.width}x{item.resized.height}
-                </span>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <Button asChild variant="secondary" size="sm">
-                  <a href={item.dataUrl} download={item.name}>
-                    下载
-                  </a>
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={async (e) => {
+          <Card key={item.name} className="group overflow-hidden shadow-sm">
+            <div className="flex h-full flex-col">
+              <CardHeader className="space-y-0 p-3 pb-2">
+                <CardTitle className="truncate text-xs font-medium" title={item.name}>
+                  {item.name}
+                </CardTitle>
+                <CardDescription className="truncate font-mono text-[10px] text-muted-foreground">
+                  {item.original.width}x{item.original.height} → {item.resized.width}x{item.resized.height}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-1 flex-col gap-3 p-3 pt-0">
+                <div className="flex h-48 w-full items-center justify-center rounded border bg-muted/30">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={item.dataUrl}
+                    alt="preview"
+                    className="max-h-full max-w-full object-contain p-1"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-2 mt-auto">
+                  <Button asChild variant="secondary" size="sm" className="h-7 text-xs">
+                    <a href={item.dataUrl} download={item.name}>
+                      下载
+                    </a>
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={async (e) => {
                     const btn = e.currentTarget
                     btn.disabled = true
                     // const originalText = btn.innerText
@@ -494,6 +488,7 @@ export default function ScalerPage() {
                 </Button>
               </div>
             </CardContent>
+            </div>
           </Card>
         ))}
       </section>
