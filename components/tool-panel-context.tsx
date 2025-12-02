@@ -10,12 +10,16 @@ const ToolPanelContext = createContext<ToolPanelContextValue | null>(null);
 
 export function ToolPanelProvider({
   children,
-  value
+  value,
 }: {
   children: ReactNode;
   value: ToolPanelContextValue;
 }) {
-  return <ToolPanelContext.Provider value={value}>{children}</ToolPanelContext.Provider>;
+  return (
+    <ToolPanelContext.Provider value={value}>
+      {children}
+    </ToolPanelContext.Provider>
+  );
 }
 
 export function useToolPanel() {

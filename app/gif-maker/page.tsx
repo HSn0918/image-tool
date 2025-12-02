@@ -8,7 +8,13 @@ import "cropperjs/dist/cropper.css";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -51,7 +57,7 @@ export default function GifMakerPage() {
     () => () => {
       cleanupObjectUrl();
     },
-    [cleanupObjectUrl]
+    [cleanupObjectUrl],
   );
 
   const loadSheet = useCallback(
@@ -68,19 +74,21 @@ export default function GifMakerPage() {
       setGifUrl(null);
       setStatus(`已读取 ${file.name}，等待图片加载…`);
     },
-    [cleanupObjectUrl]
+    [cleanupObjectUrl],
   );
 
   const handleFiles = useCallback(
     (fileList: FileList | File[]) => {
-      const files = Array.from(fileList || []).filter((file) => file.type.startsWith("image/"));
+      const files = Array.from(fileList || []).filter((file) =>
+        file.type.startsWith("image/"),
+      );
       if (!files.length) {
         setStatus("未检测到图片，请重新选择");
         return;
       }
       loadSheet(files[0]);
     },
-    [loadSheet]
+    [loadSheet],
   );
 
   const handlePaste = useCallback(
@@ -98,7 +106,7 @@ export default function GifMakerPage() {
         }
       }
     },
-    [loadSheet]
+    [loadSheet],
   );
 
   useEffect(() => {
@@ -154,14 +162,16 @@ export default function GifMakerPage() {
     overlay.innerHTML = "";
     for (let c = 1; c < cols; c++) {
       const v = document.createElement("div");
-      v.className = "absolute border-l border-white/70 top-0 shadow-[1px_0_0_0_rgba(0,0,0,0.2)]";
+      v.className =
+        "absolute border-l border-white/70 top-0 shadow-[1px_0_0_0_rgba(0,0,0,0.2)]";
       v.style.left = `${(c / cols) * 100}%`;
       v.style.height = "100%";
       overlay.appendChild(v);
     }
     for (let r = 1; r < rows; r++) {
       const h = document.createElement("div");
-      h.className = "absolute border-t border-white/70 left-0 shadow-[0_1px_0_0_rgba(0,0,0,0.2)]";
+      h.className =
+        "absolute border-t border-white/70 left-0 shadow-[0_1px_0_0_rgba(0,0,0,0.2)]";
       h.style.top = `${(r / rows) * 100}%`;
       h.style.width = "100%";
       overlay.appendChild(h);
@@ -174,9 +184,11 @@ export default function GifMakerPage() {
     setSheetInfo((info) => ({
       name: info?.name ?? "sprite-sheet",
       width: naturalWidth,
-      height: naturalHeight
+      height: naturalHeight,
     }));
-    setStatus(`已加载 ${naturalWidth}x${naturalHeight} ，默认 ${rows * cols} 帧`);
+    setStatus(
+      `已加载 ${naturalWidth}x${naturalHeight} ，默认 ${rows * cols} 帧`,
+    );
     if (cropperRef.current) {
       cropperRef.current.destroy();
     }
@@ -188,7 +200,7 @@ export default function GifMakerPage() {
         autoCropArea: 1,
         background: false,
         responsive: true,
-        crop: updateOverlay
+        crop: updateOverlay,
       });
     }
   }, [cols, rows, updateOverlay]);
@@ -238,7 +250,7 @@ export default function GifMakerPage() {
           0,
           0,
           frameWidth,
-          frameHeight
+          frameHeight,
         );
         frames.push(canvas.toDataURL("image/png"));
       }
@@ -255,7 +267,7 @@ export default function GifMakerPage() {
         interval: Math.max(delay, 20) / 1000,
         sampleInterval: 5,
         numWorkers: 2,
-        repeat: loop ? 0 : -1
+        repeat: loop ? 0 : -1,
       },
       (result) => {
         setGenerating(false);
@@ -265,7 +277,7 @@ export default function GifMakerPage() {
         }
         setGifUrl(result.image);
         setStatus(`成功生成 ${frames.length} 帧 GIF`);
-      }
+      },
     );
   }, [cols, rows, delay, loop, sheetSrc]);
 
@@ -282,7 +294,9 @@ export default function GifMakerPage() {
               </div>
               <div>
                 <CardTitle className="text-2xl">序列帧 GIF 生成器</CardTitle>
-                <CardDescription>读取图 / 网格切片 / 一键输出 GIF 动画。</CardDescription>
+                <CardDescription>
+                  读取图 / 网格切片 / 一键输出 GIF 动画。
+                </CardDescription>
               </div>
             </div>
             <Badge variant="secondary" className="text-[11px]">
@@ -290,14 +304,18 @@ export default function GifMakerPage() {
             </Badge>
           </div>
         </CardHeader>
-        <CardContent className="text-sm text-muted-foreground">{status}</CardContent>
+        <CardContent className="text-sm text-muted-foreground">
+          {status}
+        </CardContent>
       </Card>
 
       <div className="grid gap-6 lg:grid-cols-3 xl:grid-cols-[1.25fr,1fr,0.95fr]">
         <Card>
           <CardHeader className="space-y-4">
             <CardTitle>素材区</CardTitle>
-            <CardDescription>拖拽 / 点击 / 粘贴任意图，左侧为缩略预览。</CardDescription>
+            <CardDescription>
+              拖拽 / 点击 / 粘贴任意图，左侧为缩略预览。
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
             <div
@@ -327,13 +345,20 @@ export default function GifMakerPage() {
                     <div ref={overlayRef} className="absolute inset-0" />
                   </div>
                   <p className="mt-3 text-xs text-muted-foreground">
-                    {sheetInfo && sheetInfo.width && sheetInfo.height ? `${sheetInfo.width}x${sheetInfo.height}` : "加载中…"} · 共 {framesCount} 帧
+                    {sheetInfo && sheetInfo.width && sheetInfo.height
+                      ? `${sheetInfo.width}x${sheetInfo.height}`
+                      : "加载中…"}{" "}
+                    · 共 {framesCount} 帧
                   </p>
                 </>
               ) : (
                 <div className="space-y-2">
-                  <p className="text-base font-medium text-foreground">拖拽图片到此处</p>
-                  <p className="text-xs text-muted-foreground">支持粘贴 / 点击上传</p>
+                  <p className="text-base font-medium text-foreground">
+                    拖拽图片到此处
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    支持粘贴 / 点击上传
+                  </p>
                   <Button
                     type="button"
                     size="sm"
@@ -349,18 +374,29 @@ export default function GifMakerPage() {
 
             <div className="grid gap-3 sm:grid-cols-3">
               <div className="rounded-lg border border-border/70 bg-background/80 p-3 text-left">
-                <p className="text-[11px] uppercase text-muted-foreground">尺寸</p>
+                <p className="text-[11px] uppercase text-muted-foreground">
+                  尺寸
+                </p>
                 <p className="text-sm font-semibold">
-                  {sheetInfo && sheetInfo.width && sheetInfo.height ? `${sheetInfo.width} × ${sheetInfo.height}` : "--"}
+                  {sheetInfo && sheetInfo.width && sheetInfo.height
+                    ? `${sheetInfo.width} × ${sheetInfo.height}`
+                    : "--"}
                 </p>
               </div>
               <div className="rounded-lg border border-border/70 bg-background/80 p-3 text-left">
-                <p className="text-[11px] uppercase text-muted-foreground">帧数</p>
+                <p className="text-[11px] uppercase text-muted-foreground">
+                  帧数
+                </p>
                 <p className="text-sm font-semibold">{framesCount}</p>
               </div>
               <div className="rounded-lg border border-border/70 bg-background/80 p-3 text-left">
-                <p className="text-[11px] uppercase text-muted-foreground">文件名</p>
-                <p className="truncate text-sm font-semibold" title={sheetInfo?.name ?? "未命名"}>
+                <p className="text-[11px] uppercase text-muted-foreground">
+                  文件名
+                </p>
+                <p
+                  className="truncate text-sm font-semibold"
+                  title={sheetInfo?.name ?? "未命名"}
+                >
                   {sheetInfo?.name ?? "未命名"}
                 </p>
               </div>
@@ -371,7 +407,9 @@ export default function GifMakerPage() {
         <Card>
           <CardHeader className="space-y-4">
             <CardTitle>参数配置</CardTitle>
-            <CardDescription>自定义网格、帧率以及循环行为，一键输出。</CardDescription>
+            <CardDescription>
+              自定义网格、帧率以及循环行为，一键输出。
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
             <div className="grid gap-4 sm:grid-cols-2">
@@ -382,7 +420,9 @@ export default function GifMakerPage() {
                   type="number"
                   min={1}
                   value={cols}
-                  onChange={(event) => setCols(Math.max(1, Number(event.target.value) || 1))}
+                  onChange={(event) =>
+                    setCols(Math.max(1, Number(event.target.value) || 1))
+                  }
                 />
               </div>
               <div className="space-y-2">
@@ -392,7 +432,9 @@ export default function GifMakerPage() {
                   type="number"
                   min={1}
                   value={rows}
-                  onChange={(event) => setRows(Math.max(1, Number(event.target.value) || 1))}
+                  onChange={(event) =>
+                    setRows(Math.max(1, Number(event.target.value) || 1))
+                  }
                 />
               </div>
               <div className="space-y-2">
@@ -402,7 +444,9 @@ export default function GifMakerPage() {
                   type="number"
                   min={1}
                   value={delay}
-                  onChange={(event) => setDelay(Math.max(1, Number(event.target.value) || 1))}
+                  onChange={(event) =>
+                    setDelay(Math.max(1, Number(event.target.value) || 1))
+                  }
                 />
               </div>
               <div className="flex items-center gap-2 pt-6">
@@ -424,7 +468,12 @@ export default function GifMakerPage() {
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <Button type="button" onClick={generateGif} disabled={!sheetSrc || generating} className="flex-1 min-w-[140px]">
+              <Button
+                type="button"
+                onClick={generateGif}
+                disabled={!sheetSrc || generating}
+                className="flex-1 min-w-[140px]"
+              >
                 {generating ? "合成中…" : `生成 GIF（${framesCount} 帧）`}
               </Button>
               <Button
@@ -448,15 +497,23 @@ export default function GifMakerPage() {
         <Card className="flex flex-col justify-between">
           <CardHeader>
             <CardTitle>GIF 预览与下载</CardTitle>
-            <CardDescription>生成后可在此预览，点击下方按钮保存。</CardDescription>
+            <CardDescription>
+              生成后可在此预览，点击下方按钮保存。
+            </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex min-h-[200px] items-center justify-center rounded-lg border bg-muted/20 p-4">
               {gifUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={gifUrl} alt="GIF preview" className="h-full max-h-52 w-full max-w-xs object-contain" />
+                <img
+                  src={gifUrl}
+                  alt="GIF preview"
+                  className="h-full max-h-52 w-full max-w-xs object-contain"
+                />
               ) : (
-                <p className="text-sm text-muted-foreground">暂无 GIF，请先生成。</p>
+                <p className="text-sm text-muted-foreground">
+                  暂无 GIF，请先生成。
+                </p>
               )}
             </div>
             <Button asChild disabled={!gifUrl} variant="secondary">

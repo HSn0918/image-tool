@@ -1,33 +1,39 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { ArrowRight, Crop, Film, Maximize2 } from 'lucide-react';
+import Link from "next/link";
+import { ArrowRight, Crop, Film, Maximize2 } from "lucide-react";
 
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 
 const tools = [
   {
-    href: '/slicer',
-    title: '图片裁剪分片',
-    description: '网格切片序列，导出高清 ZIP 包。',
-    detail: '拖拽 / 点击 / 粘贴 输入',
-    icon: Crop
+    href: "/slicer",
+    title: "图片裁剪分片",
+    description: "网格切片序列，导出高清 ZIP 包。",
+    detail: "拖拽 / 点击 / 粘贴 输入",
+    icon: Crop,
   },
   {
-    href: '/scaler',
-    title: '等比例缩放器',
-    description: '长边缩放与批量导出，自动重命名。',
-    detail: '批量拖拽 / 粘贴 / ZIP 打包',
-    icon: Maximize2
+    href: "/scaler",
+    title: "等比例缩放器",
+    description: "长边缩放与批量导出，自动重命名。",
+    detail: "批量拖拽 / 粘贴 / ZIP 打包",
+    icon: Maximize2,
   },
   {
-    href: '/gif-maker',
-    title: '序列帧 GIF 生成',
-    description: '按网格拆分精灵图，设置帧率后一键导出 GIF。',
-    detail: '默认 6×4，可自定义行列与间隔',
-    icon: Film
-  }
+    href: "/gif-maker",
+    title: "序列帧 GIF 生成",
+    description: "按网格拆分精灵图，设置帧率后一键导出 GIF。",
+    detail: "默认 6×4，可自定义行列与间隔",
+    icon: Film,
+  },
 ];
 
 export default function Home() {
@@ -38,7 +44,9 @@ export default function Home() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-2xl">选择工具</CardTitle>
-              <CardDescription>所有操作均在浏览器本地执行，无需上传。</CardDescription>
+              <CardDescription>
+                所有操作均在浏览器本地执行，无需上传。
+              </CardDescription>
             </div>
             <Badge variant="secondary" className="text-[11px]">
               v1.0.0
@@ -54,7 +62,11 @@ export default function Home() {
         {tools.map((tool) => {
           const Icon = tool.icon;
           return (
-            <Link key={tool.href} href={tool.href} className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+            <Link
+              key={tool.href}
+              href={tool.href}
+              className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
               <Card className="h-full border-border/80 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:border-primary/40 group-hover:shadow-lg">
                 <CardHeader className="space-y-4">
                   <div className="flex items-center justify-between">

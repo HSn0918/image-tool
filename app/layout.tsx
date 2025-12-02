@@ -9,7 +9,7 @@ import { AppFrame } from "@/components/app-frame";
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-sans"
+  variable: "--font-sans",
 });
 
 export const metadata = {
@@ -23,7 +23,12 @@ export const metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="zh-CN" suppressHydrationWarning>
-      <body className={cn("min-h-screen bg-muted/30 font-sans antialiased", inter.variable)}>
+      <body
+        className={cn(
+          "min-h-screen bg-muted/30 font-sans antialiased",
+          inter.variable,
+        )}
+      >
         <Providers>
           <AppFrame>{children}</AppFrame>
         </Providers>
