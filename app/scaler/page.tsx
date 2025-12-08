@@ -14,6 +14,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+import { resizeImageWithWasm } from "@/lib/wasm-resizer";
+
 interface OutputItem {
   name: string;
   dataUrl: string;
@@ -47,38 +49,81 @@ export default function ScalerPage() {
     ]);
   };
 
-  const processImage = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const img = new Image();
-      img.onload = () => {
-        const target = Math.max(size || 240, 1);
-        const scale = target / Math.max(img.width, img.height);
-        const newWidth = Math.round(img.width * scale);
-        const newHeight = Math.round(img.height * scale);
-        const canvas = document.createElement("canvas");
-        canvas.width = newWidth;
-        canvas.height = newHeight;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return;
-        ctx.drawImage(img, 0, 0, newWidth, newHeight);
-        const dataUrl = canvas.toDataURL("image/png");
-        addResult(
-          file.name,
-          dataUrl,
-          { width: img.width, height: img.height },
-          { width: newWidth, height: newHeight },
-        );
-        setInfo(`已处理 ${outputs.length + 1} 张图片`);
+  const blobToDataUrl = (blob: Blob) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error("无法读取生成的数据"));
+      reader.onload = () => resolve(reader.result as string);
+      reader.readAsDataURL(blob);
+    });
+
+  const processImageWithCanvas = (file: File, target: number) =>
+    new Promise<void>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error("文件读取失败"));
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+          const scale = target / Math.max(img.width, img.height);
+          const newWidth = Math.max(1, Math.round(img.width * scale));
+          const newHeight = Math.max(1, Math.round(img.height * scale));
+          const canvas = document.createElement("canvas");
+          canvas.width = newWidth;
+          canvas.height = newHeight;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            reject(new Error("Canvas 不可用"));
+            return;
+          }
+          ctx.drawImage(img, 0, 0, newWidth, newHeight);
+          const dataUrl = canvas.toDataURL("image/png");
+          addResult(
+            file.name,
+            dataUrl,
+            { width: img.width, height: img.height },
+            { width: newWidth, height: newHeight },
+          );
+          resolve();
+        };
+        img.onerror = () => reject(new Error("图片解析失败"));
+        if (ev.target?.result) {
+          img.src = ev.target.result as string;
+        } else {
+          reject(new Error("空白图像数据"));
+        }
       };
-      if (ev.target?.result) {
-        img.src = ev.target.result as string;
+      reader.readAsDataURL(file);
+    });
+
+  const processImage = async (file: File) => {
+    const target = Math.max(size || 240, 1);
+    try {
+      if (typeof WebAssembly === "undefined") {
+        throw new Error("WebAssembly unsupported");
       }
-    };
-    reader.readAsDataURL(file);
+      const buffer = await file.arrayBuffer();
+      const result = await resizeImageWithWasm(
+        new Uint8Array(buffer),
+        target,
+      );
+      const bytes = result.data;
+      const normalized = new Uint8Array(bytes.length);
+      normalized.set(bytes);
+      const blob = new Blob([normalized.buffer], { type: "image/png" });
+      const dataUrl = await blobToDataUrl(blob);
+      addResult(
+        file.name,
+        dataUrl,
+        { width: result.originalWidth, height: result.originalHeight },
+        { width: result.width, height: result.height },
+      );
+    } catch (error) {
+      console.warn(`wasm 处理失败，回退到 Canvas：${file.name}`, error);
+      await processImageWithCanvas(file, target);
+    }
   };
 
-  const handleFiles = (fileList: FileList | File[]) => {
+  const handleFiles = async (fileList: FileList | File[]) => {
     const files = Array.from(fileList || []).filter((f) =>
       f.type.startsWith("image/"),
     );
@@ -87,7 +132,15 @@ export default function ScalerPage() {
       return;
     }
     setInfo(`正在处理 ${files.length} 张图片...`);
-    files.forEach(processImage);
+    for (const file of files) {
+      try {
+        await processImage(file);
+      } catch (err) {
+        console.error(err);
+        setInfo(`处理失败：${file.name}`);
+      }
+    }
+    setInfo(`已处理 ${files.length} 张图片`);
   };
 
   const handlePaste = useCallback((e: ClipboardEvent) => {
@@ -102,7 +155,7 @@ export default function ScalerPage() {
     }
     if (images.length) {
       e.preventDefault();
-      handleFiles(images);
+      void handleFiles(images);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -125,7 +178,7 @@ export default function ScalerPage() {
       e.preventDefault();
       dropzone.classList.remove("border-primary", "bg-background");
       if (e.dataTransfer?.files) {
-        handleFiles(e.dataTransfer.files);
+        void handleFiles(e.dataTransfer.files);
       }
     };
     // @ts-ignore - Native events
@@ -186,7 +239,7 @@ export default function ScalerPage() {
         setInfo("剪贴板中无图片");
         return;
       }
-      handleFiles(images);
+      void handleFiles(images);
     } catch (err) {
       console.error(err);
       setInfo("剪贴板读取失败");
@@ -360,9 +413,9 @@ export default function ScalerPage() {
                 type="file"
                 accept="image/*"
                 multiple
-                className="hidden"
-                onChange={(e) => {
-                  if (e.target.files) handleFiles(e.target.files);
+              className="hidden"
+              onChange={(e) => {
+                  if (e.target.files) void handleFiles(e.target.files);
                 }}
               />
               <Button asChild variant="secondary">
